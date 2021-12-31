@@ -1,0 +1,1 @@
+INSERT INTO `songs` (name, link, thumbnail, releasedAt, genre_id) VALUE ("Call out my name", "linkk", "thumb", "2013-02-05", 1)
