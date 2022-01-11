@@ -17,9 +17,5 @@ public interface PlaylistDetailRepository extends JpaRepository<PlaylistDetail, 
     List<Object> findByIdPlaylistId(Long id);
     Object findByIdPlaylistIdAndSongId(Long pid, Long sid);
     List<Object> findByIdSongId(Long id);
-//    void deleteByIdPlaylistIdAndSongId(Long pid, Long sid);
-
-    @Query(value = "delete from playlist_details where song_id = :songId and playlist_id = :playListId", nativeQuery = true)
-    void deleteById(@Param("songId") Long songId, @Param("playListId") Long playListId);
 
 }

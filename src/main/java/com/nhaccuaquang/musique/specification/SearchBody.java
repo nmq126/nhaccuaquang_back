@@ -13,7 +13,7 @@ public class SearchBody {
     private String name;
     private String from;
     private String to;
-    private boolean status;
+    private int status;
     private Long genre_id;
     private Long id;
 
@@ -24,7 +24,7 @@ public class SearchBody {
         private String name;
         private String from;
         private String to;
-        private boolean status;
+        private int status;
         private Long genre_id;
         private Long id;
 
@@ -60,7 +60,7 @@ public class SearchBody {
             return this;
         }
 
-        public SearchBodyBuilder withStatus(boolean status) {
+        public SearchBodyBuilder withStatus(int status) {
             this.status = status;
             return this;
         }

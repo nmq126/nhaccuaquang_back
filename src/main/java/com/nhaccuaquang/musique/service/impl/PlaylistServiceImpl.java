@@ -8,6 +8,7 @@ import com.nhaccuaquang.musique.repository.SongRepository;
 import com.nhaccuaquang.musique.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,54 +26,54 @@ public class PlaylistServiceImpl implements PlaylistService {
     PlaylistDetailRepository playlistDetailRepository;
 
     @Override
-    public ResponseHandler findAll() throws Exception {
+    public ResponseEntity findAll() throws Exception {
         try {
             List<Playlist> playlists = playlistRepository.findAll();
             if (playlists.isEmpty()) {
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
                         .withMessage("Playlist list is empty")
-                        .build();
+                        .build(), HttpStatus.NO_CONTENT);
             }
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Okela")
                     .withData("playlists", playlists)
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }
     }
 
     @Override
-    public ResponseHandler save(Playlist playlist) throws Exception {
+    public ResponseEntity save(Playlist playlist) throws Exception {
         try {
             playlistRepository.save(playlist);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.CREATED.value())
                     .withMessage("Playlist created successfully")
-                    .build();
+                    .build(), HttpStatus.CREATED);
         } catch (Exception e) {
             throw new Exception();
         }
     }
 
     @Override
-    public ResponseHandler findById(Long id) {
+    public ResponseEntity findById(Long id) {
         Optional<Playlist> playlist = playlistRepository.findById(id);
         if (playlist.isPresent()) {
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("okela")
                     .withData("playlist", playlist.get())
-                    .build();
+                    .build(), HttpStatus.OK);
         } else {
             throw new NotFoundException("Playlist id not found");
         }
     }
 
     @Override
-    public ResponseHandler update(Long id, Playlist playlist) throws Exception {
+    public ResponseEntity update(Long id, Playlist playlist) throws Exception {
 
         Optional<Playlist> playlistData = playlistRepository.findById(id);
         if (!playlistData.isPresent()) throw new NotFoundException("Playlist id not found");
@@ -83,10 +84,10 @@ public class PlaylistServiceImpl implements PlaylistService {
         updatedPlaylist.setPrivate(playlist.isPrivate());
         try {
             playlistRepository.save(updatedPlaylist);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Playlist updated successfully")
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }
@@ -94,15 +95,15 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
-    public ResponseHandler delete(Long id) throws Exception {
+    public ResponseEntity delete(Long id) throws Exception {
         Optional<Playlist> playlistData = playlistRepository.findById(id);
         if (playlistData.isPresent()) {
             try {
                 playlistRepository.deleteById(id);
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
                         .withMessage("Playlist deleted succesfully")
-                        .build();
+                        .build(), HttpStatus.NO_CONTENT);
             } catch (Exception e) {
                 throw new Exception();
             }
@@ -148,7 +149,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 //    }
 
     @Override
-    public ResponseHandler removeSongFromPlaylist(Long playlistId, Long songId) throws Exception {
+    public ResponseEntity removeSongFromPlaylist(Long playlistId, Long songId) throws Exception {
         Optional<Playlist> playlist = playlistRepository.findById(playlistId);
         if (!playlist.isPresent()) throw new NotFoundException("Playlist id not found");
         Playlist realPlaylist = playlist.get();
@@ -165,19 +166,21 @@ public class PlaylistServiceImpl implements PlaylistService {
             existence = true;
         }
         if (!existence){
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.BAD_REQUEST.value())
                     .withMessage("This song is not in the playlist")
-                    .build();
+                    .build(), HttpStatus.BAD_REQUEST);
         }
 
         try {
             PlaylistDetailKey key = new PlaylistDetailKey(songId, playlistId);
-            playlistDetailRepository.deleteById(songId,playlistId);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            realPlaylist.removeSongFromPlaylist(playlistDetailRepository.findById(key).get());
+            playlistDetailRepository.deleteById(key);
+            return new
+                    ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Song removed successfully")
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             e.getStackTrace();
             throw new Exception();
@@ -186,14 +189,28 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     //find all playlist detail of a playlist by its id
     @Override
-    public ResponseHandler findDetailById(Long id) {
+    public ResponseEntity findDetailById(Long id) {
         Optional<Playlist> playlist = playlistRepository.findById(id);
         if (playlist.isPresent()) {
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("okela")
                     .withData("playlist", playlistDetailRepository.findByIdPlaylistId(id))
-                    .build();
+                    .build(), HttpStatus.OK);
+        } else {
+            throw new NotFoundException("Playlist id not found");
+        }
+    }
+
+    @Override
+    public ResponseEntity findDetailById1(Long id) {
+        Optional<Playlist> playlist = playlistRepository.findById(id);
+        if (playlist.isPresent()) {
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                    .withStatus(HttpStatus.OK.value())
+                    .withMessage("okela")
+                    .withData("playlist", playlistRepository.findPlaylistDetailByPlaylistId(id))
+                    .build(), HttpStatus.OK);
         } else {
             throw new NotFoundException("Playlist id not found");
         }

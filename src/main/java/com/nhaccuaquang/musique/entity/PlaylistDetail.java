@@ -28,6 +28,9 @@ public class PlaylistDetail {
     @JsonIgnore
     @JoinColumn(name = "playlist_id")
     private Playlist playlist;
+
+    @Column(name = "previous_song_id")
+    private Long previousSongId;
 }
 
 

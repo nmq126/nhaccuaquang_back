@@ -7,6 +7,7 @@ import com.nhaccuaquang.musique.repository.GenreRepository;
 import com.nhaccuaquang.musique.service.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,54 +20,54 @@ public class GenreServiceImpl implements GenreService {
     GenreRepository genreRepository;
 
     @Override
-    public ResponseHandler findAll() throws Exception {
+    public ResponseEntity findAll() throws Exception {
         try {
             List<Genre> genres = genreRepository.findAll();
             if (genres.isEmpty()) {
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
                         .withMessage("Genre list is empty")
-                        .build();
+                        .build(),HttpStatus.NO_CONTENT);
             }
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Okela")
                     .withData("genres", genres)
-                    .build();
+                    .build(),HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }
     }
 
     @Override
-    public ResponseHandler findById(Long id) {
+    public ResponseEntity findById(Long id) {
         Optional<Genre> genre = genreRepository.findById(id);
         if (genre.isPresent()) {
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("okela")
                     .withData("genre", genre.get())
-                    .build();
+                    .build(), HttpStatus.OK);
         } else {
             throw new NotFoundException("Genre id not found");
         }
     }
 
     @Override
-    public ResponseHandler save(Genre genre) throws Exception {
+    public ResponseEntity save(Genre genre) throws Exception {
         try {
             genreRepository.save(genre);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.CREATED.value())
                     .withMessage("Created successfully")
-                    .build();
+                    .build(),HttpStatus.CREATED);
         } catch (Exception e) {
             throw new Exception();
         }
     }
 
     @Override
-    public ResponseHandler update(Long id, Genre genre) throws Exception {
+    public ResponseEntity update(Long id, Genre genre) throws Exception {
 
         Optional<Genre> genreData = genreRepository.findById(id);
         if (!genreData.isPresent()) throw new NotFoundException("Genre id not found");
@@ -76,10 +77,10 @@ public class GenreServiceImpl implements GenreService {
         updatedGenre.setDescription(genre.getDescription());
         try {
             genreRepository.save(updatedGenre);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Updated successfully")
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }
@@ -87,15 +88,15 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
-    public ResponseHandler delete(Long id) throws Exception {
+    public ResponseEntity delete(Long id) throws Exception {
         Optional<Genre> genreData = genreRepository.findById(id);
         if (genreData.isPresent()) {
             try {
                 genreRepository.deleteById(id);
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
                         .withMessage("Deleted succesfully")
-                        .build();
+                        .build(), HttpStatus.NO_CONTENT);
             } catch (Exception e) {
                 throw new Exception();
             }

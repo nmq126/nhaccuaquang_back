@@ -9,6 +9,7 @@ import com.nhaccuaquang.musique.service.SongService;
 import com.nhaccuaquang.musique.specification.SearchBody;
 import com.nhaccuaquang.musique.specification.SearchCriteria;
 import com.nhaccuaquang.musique.specification.SongSpecification;
+import com.nhaccuaquang.musique.util.DateTimeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,10 +17,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
 import java.util.*;
 
 @Service
@@ -31,53 +33,50 @@ public class SongServiceImpl implements SongService {
     GenreRepository genreRepository;
     @Autowired
     PlaylistRepository playlistRepository;
+    @Autowired
+    DateTimeHandler dateTimeHandler;
 
     @Override
-    public ResponseHandler findAll(SearchBody searchBody) throws Exception {
+    public ResponseEntity findAll(SearchBody searchBody) throws Exception {
 
         Specification specification = Specification.where(null);
-        //default status = true
-        specification = specification.and(new SongSpecification(new SearchCriteria("status", ":", searchBody.isStatus())));
+        if (searchBody.getStatus() != -1){
+            specification = specification.and(new SongSpecification(new SearchCriteria("status", ":", searchBody.getStatus())));
+        }
         if (searchBody.getName() != null && searchBody.getName().length() > 0){
             specification = specification.and(new SongSpecification(new SearchCriteria("name", ":", searchBody.getName())));
         }
-        if (searchBody.getGenre_id() != null){
+        if (searchBody.getGenre_id() != -1){
             specification = specification.and(new SongSpecification(new SearchCriteria("genre_id", ":", searchBody.getGenre_id())));
         }
         if (searchBody.getId() != null){
             specification = specification.and(new SongSpecification(new SearchCriteria("id", ":", searchBody.getId())));
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if (searchBody.getFrom() != null){
-            try {
-                Date date = sdf.parse(searchBody.getFrom());
+                LocalDate date = dateTimeHandler.convertStringToLocalDate(searchBody.getFrom());
                 specification = specification.and(new SongSpecification(new SearchCriteria("releasedAt", ">", date)));
-            }catch (Exception e){
-            }
+
         }
         if (searchBody.getTo() != null){
-            try {
-                Date date = sdf.parse(searchBody.getTo());
-                specification = specification.and(new SongSpecification(new SearchCriteria("releasedAt", "<", date)));
-            }catch (ParseException e){
-            }
+            LocalDate date = dateTimeHandler.convertStringToLocalDate(searchBody.getTo());
+            specification = specification.and(new SongSpecification(new SearchCriteria("releasedAt", "<", date)));
+
         }
         try {
             Sort sort = Sort.by(Sort.Order.desc("id"));
             Pageable pageable = PageRequest.of(searchBody.getPage() - 1, searchBody.getLimit(), sort);
             Page<Song> songs = songRepository.findAll(specification, pageable);
-//            List<Song> songs = songRepository.findAll(specification);
             if (songs.isEmpty()) {
-                return  ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return  new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
                         .withMessage("No song satisfied")
-                        .build();
+                        .build(), HttpStatus.NO_CONTENT);
             }
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Okela")
                     .withData("songs", songs)
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }
@@ -105,29 +104,29 @@ public class SongServiceImpl implements SongService {
 //    }
 
     @Override
-    public ResponseHandler findById(Long id) {
+    public ResponseEntity findById(Long id) {
         Optional<Song> song = songRepository.findById(id);
         if (song.isPresent()) {
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("okela")
                     .withData("song", song.get())
-                    .build();
+                    .build(), HttpStatus.OK);
         } else {
             throw new NotFoundException("Song id not found");
         }
     }
 
     @Override
-    public ResponseHandler save(Song song) throws Exception {
+    public ResponseEntity save(Song song) throws Exception {
         Optional<Genre> genreData = genreRepository.findById(song.getGenre_id());
         if (genreData.isPresent()) {
             try {
                 songRepository.save(song);
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.CREATED.value())
                         .withMessage("Created successfully")
-                        .build();
+                        .build(), HttpStatus.CREATED);
             } catch (Exception e) {
                 throw new Exception();
             }
@@ -135,7 +134,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public ResponseHandler update(Long id, Song song) throws Exception {
+    public ResponseEntity update(Long id, Song song) throws Exception {
         Optional<Song> songData = songRepository.findById(id);
         if (!songData.isPresent()) throw new NotFoundException("Song id not found");
         Optional<Genre> genreData = genreRepository.findById(song.getGenre_id());
@@ -147,13 +146,13 @@ public class SongServiceImpl implements SongService {
         updatedSong.setThumbnail(song.getThumbnail());
         updatedSong.setReleasedAt(song.getReleasedAt());
         updatedSong.setGenre_id(song.getGenre_id());
-        updatedSong.setStatus(song.isStatus());
+        updatedSong.setStatus(song.getStatus());
         try {
             songRepository.save(updatedSong);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Updated successfully")
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }
@@ -161,15 +160,15 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public ResponseHandler delete(Long id) throws Exception {
+    public ResponseEntity delete(Long id) throws Exception {
         Optional<Song> songData = songRepository.findById(id);
         if (songData.isPresent()) {
             try {
                 songRepository.deleteById(id);
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
                         .withMessage("Deleted succesfully")
-                        .build();
+                        .build(), HttpStatus.NO_CONTENT);
             } catch (Exception e) {
                 throw new Exception();
             }
@@ -178,7 +177,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public ResponseHandler addSongToPlaylist(Long playlistId, Long songId) throws Exception {
+    public ResponseEntity addSongToPlaylist(Long playlistId, Long songId) throws Exception {
         Optional<Playlist> playlist = playlistRepository.findById(playlistId);
         if (!playlist.isPresent()) throw new NotFoundException("Playlist id not found");
         Playlist realPlaylist = playlist.get();
@@ -190,10 +189,10 @@ public class SongServiceImpl implements SongService {
         Set<PlaylistDetail> playlistDetailList = realPlaylist.getPlaylistDetails();
         for (PlaylistDetail playlistDetail:playlistDetailList){
             if (playlistDetail.getId().getSongId() == songId){
-                return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.BAD_REQUEST.value())
                         .withMessage("Song already existed")
-                        .build();
+                        .build(), HttpStatus.BAD_REQUEST);
             }
         }
 
@@ -202,13 +201,14 @@ public class SongServiceImpl implements SongService {
         playlistDetail.setSong(realSong);
         playlistDetail.setPlaylist(realPlaylist);
         realPlaylist.addPlaylistDetailSet(playlistDetail);
+        realPlaylist.setUpdatedAt(new Date());
 
         try {
             playlistRepository.save(realPlaylist);
-            return ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                     .withStatus(HttpStatus.OK.value())
                     .withMessage("Song added successfully")
-                    .build();
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new Exception();
         }

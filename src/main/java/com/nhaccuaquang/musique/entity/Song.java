@@ -4,6 +4,7 @@ package com.nhaccuaquang.musique.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,8 +43,7 @@ public class Song {
 
     @Column(name = "released_at")
     @PastOrPresent(message = "Released date must be past or present")
-    @Temporal(TemporalType.DATE)
-    private Date releasedAt;
+    private LocalDate releasedAt;
 
     @ManyToOne
     @JsonIgnore
@@ -59,8 +60,8 @@ public class Song {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<PlaylistDetail> playlistDetails = new HashSet<>();
 
-    @Column(name = "status", columnDefinition = "boolean default true")
-    private boolean status = true;
+    @Column(name = "status", columnDefinition = "int default 1")
+    private Integer status = 1;
 
     @Column(name = "created_at", updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @CreationTimestamp
