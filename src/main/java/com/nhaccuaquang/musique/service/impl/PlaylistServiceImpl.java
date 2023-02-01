@@ -6,7 +6,11 @@ import com.nhaccuaquang.musique.repository.PlaylistDetailRepository;
 import com.nhaccuaquang.musique.repository.PlaylistRepository;
 import com.nhaccuaquang.musique.repository.SongRepository;
 import com.nhaccuaquang.musique.service.PlaylistService;
+import com.nhaccuaquang.musique.specification.PlaylistSpecification;
+import com.nhaccuaquang.musique.specification.SearchCriteria;
+import com.nhaccuaquang.musique.specification.SongSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,9 +30,17 @@ public class PlaylistServiceImpl implements PlaylistService {
     PlaylistDetailRepository playlistDetailRepository;
 
     @Override
-    public ResponseEntity findAll() throws Exception {
+    public ResponseEntity findAll(String keyword) throws Exception {
+        Specification specification = Specification.where(null);
+        if (keyword != null && keyword.length() > 0){
+            specification = specification.and(
+                                new PlaylistSpecification(
+                                        new SearchCriteria("name", "join", keyword)
+                                )
+                            );
+        }
         try {
-            List<Playlist> playlists = playlistRepository.findAll();
+            List<Playlist> playlists = playlistRepository.findAll(specification);
             if (playlists.isEmpty()) {
                 return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())

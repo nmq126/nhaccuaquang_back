@@ -107,6 +107,36 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public ResponseEntity update(Long id, Account account) throws Exception {
+        Optional<Account> accountData = accountRepository.findById(id);
+        if (!accountData.isPresent()) throw new NotFoundException("Account id not found");
+
+        account.getPermissions().forEach(permission -> {
+            Optional<Permission> foundPermission = permissionRepository.findById(permission.getPermissionId());
+            if (!foundPermission.isPresent()) throw new NotFoundException("Permission not found");
+        });
+
+        account.getRoles().forEach(role -> {
+            Optional<Role> foundRole = roleRepository.findById(role.getRoleId());
+            if (!foundRole.isPresent()) throw new NotFoundException("Role not found");
+        });
+
+        Account updatedAccount = accountData.get();
+        updatedAccount.addPermissionToAccount(account.getPermissions());
+        updatedAccount.addRoleToAccount(account.getRoles());
+        try {
+            accountRepository.save(updatedAccount);
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                    .withStatus(HttpStatus.OK.value())
+                    .withMessage("Updated successfully")
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            throw new Exception();
+        }
+    }
+
+
+    @Override
     public ResponseEntity addRoleToAccount(String username, String roleName) throws Exception{
         Optional<Account> account = accountRepository.findByUsername(username);
         if (!account.isPresent()) throw new NotFoundException("User not found");
@@ -189,6 +219,35 @@ public class AccountServiceImpl implements AccountService {
             }
 
         }
+    }
+
+    @Override
+    public ResponseEntity removePermissionFromAccount(String username, String permName) throws Exception {
+        Optional<Account> account = accountRepository.findByUsername(username);
+        if (!account.isPresent()) throw new NotFoundException("User not found");
+
+        Optional<Permission> permission = permissionRepository.findByName(permName);
+        if (!permission.isPresent()) throw new NotFoundException("Permission not found");
+
+        if (!account.get().getPermissions().contains(permission.get())){
+            return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                    .withStatus(HttpStatus.BAD_REQUEST.value())
+                    .withMessage("Permission not yet added to this account")
+                    .build(), HttpStatus.BAD_REQUEST);
+        }else {
+            try {
+                account.get().getPermissions().remove(permission.get());
+                accountRepository.save(account.get());
+
+                return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                        .withStatus(HttpStatus.OK.value())
+                        .withMessage("Permission removed successfully from this account")
+                        .build(), HttpStatus.OK);
+            }catch (Exception e){
+                throw new Exception();
+            }
+        }
+
     }
 
 

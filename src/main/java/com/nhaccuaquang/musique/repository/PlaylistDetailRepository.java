@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public interface PlaylistDetailRepository extends JpaRepository<PlaylistDetail, PlaylistDetailKey> {
     List<Object> findByIdPlaylistId(Long id);
-    Object findByIdPlaylistIdAndSongId(Long pid, Long sid);
-    List<Object> findByIdSongId(Long id);
+//    Object findByIdPlaylistIdAndSongId(Long pid, Long sid);
+//    List<Object> findByIdSongId(Long id);
 
 }

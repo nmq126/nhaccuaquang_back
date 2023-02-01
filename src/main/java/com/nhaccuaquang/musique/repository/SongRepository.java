@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long>, JpaSpecificationExecutor<Song> {
+    boolean existsByAlbumIdAndSongNumber(Long albumId, Integer songNumber);
 }

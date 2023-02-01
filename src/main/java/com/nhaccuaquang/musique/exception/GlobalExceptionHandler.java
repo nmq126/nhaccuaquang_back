@@ -34,6 +34,14 @@ public class GlobalExceptionHandler {
                 .build(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(DuplicateException.class)
+    public final ResponseEntity handleDuplicateException(DuplicateException ex) {
+        return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
+                .withStatus(HttpStatus.NOT_FOUND.value())
+                .withMessage(ex.getMessage())
+                .build(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){
         List<String> details = new ArrayList<>();

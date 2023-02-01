@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Set;
 
 public interface PlaylistService {
-    ResponseEntity findAll() throws Exception;
+    ResponseEntity findAll(String keyword) throws Exception;
     ResponseEntity findById(Long id);
     ResponseEntity save(Playlist playlist) throws Exception;
     ResponseEntity update(Long id, Playlist playlist) throws Exception;

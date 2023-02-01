@@ -56,6 +56,8 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeHttpRequests()
                 //access rules
                 .antMatchers( "/api/v1/accounts/token/refresh").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/songs").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/v1/accounts").permitAll()
 //                .antMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole("ADMIN")
 //                .antMatchers(HttpMethod.POST, "/api/v1/accounts/role/*", "/api/v1/accounts").hasRole("ADMIN")
 //                .antMatchers(HttpMethod.POST, "/api/v1/**").hasRole("EMPLOYEE")

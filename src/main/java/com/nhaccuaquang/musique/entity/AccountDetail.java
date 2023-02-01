@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class AccountDetail {
 
     @Id
-    @Column(name = "account_id")
+    @Column(name = "account_detail_id")
     private Long id;
 
     @OneToOne

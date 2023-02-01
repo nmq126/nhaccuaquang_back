@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 
 @Entity
@@ -18,9 +19,12 @@ import java.util.Collection;
 public class Role {
 
     @Id
+    @Column(name = "role_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long roleId;
 
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Role name is required")
     private String name;
 
     @JsonIgnore
@@ -30,10 +34,11 @@ public class Role {
 //    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "roles_permissions",
+            name = "role_permissions",
             joinColumns = @JoinColumn(
-                    name = "role_id", referencedColumnName = "id"),
+                    name = "role_id", referencedColumnName = "role_id"),
             inverseJoinColumns = @JoinColumn(
-                    name = "permission_id", referencedColumnName = "id"))
+                    name = "permission_id", referencedColumnName = "permission_id"))
     private Collection<Permission> permissions;
+
 }

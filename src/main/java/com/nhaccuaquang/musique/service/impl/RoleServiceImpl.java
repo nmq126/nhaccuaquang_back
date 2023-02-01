@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -80,7 +79,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public ResponseEntity save(Role role) throws Exception {
         role.getPermissions().forEach(permission -> {
-            Optional<Permission> foundPermission = permissionRepository.findById(permission.getId());
+            Optional<Permission> foundPermission = permissionRepository.findById(permission.getPermissionId());
             if (!foundPermission.isPresent()) throw new NotFoundException("Permission not found");
         });
         try {
@@ -99,7 +98,7 @@ public class RoleServiceImpl implements RoleService {
         Optional<Role> roleData = roleRepository.findById(id);
         if (!roleData.isPresent()) throw new NotFoundException("Role id not found");
         role.getPermissions().forEach(permission -> {
-            Optional<Permission> foundPermission = permissionRepository.findById(permission.getId());
+            Optional<Permission> foundPermission = permissionRepository.findById(permission.getPermissionId());
             if (!foundPermission.isPresent()) throw new NotFoundException("Permission not found");
         });
 
@@ -122,17 +121,21 @@ public class RoleServiceImpl implements RoleService {
     public ResponseEntity delete(Long id) throws Exception {
         Optional<Role> roleData = roleRepository.findById(id);
         if (roleData.isPresent()) {
+
             try {
+                for (Account account: roleData.get().getAccounts()) {
+                    account.removeRoleFromAccount(roleData.get());
+                }
                 roleRepository.deleteById(id);
                 return new ResponseEntity(ResponseHandler.ResponseHandlerBuilder.aResponseHandler()
                         .withStatus(HttpStatus.NO_CONTENT.value())
-                        .withMessage("Deleted succesfully")
+                        .withMessage("Deleted successfully")
                         .build(), HttpStatus.NO_CONTENT);
             } catch (Exception e) {
                 throw new Exception();
             }
         } else
-            throw new NotFoundException("Song id not found");
+            throw new NotFoundException("Role id not found");
     }
 
 

@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhaccuaquang.musique.entity.Account;
 import com.nhaccuaquang.musique.entity.Permission;
+import com.nhaccuaquang.musique.entity.Role;
 import com.nhaccuaquang.musique.repository.AccountRepository;
 import com.nhaccuaquang.musique.service.AccountService;
 import lombok.Data;
@@ -48,10 +49,16 @@ public class AccountController {
         return accountService.findById(id);
     }
 
-    @PreAuthorize("hasAuthority('create:accounts')")
+//    @PreAuthorize("hasAuthority('create:accounts')")
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity createAccount(@RequestBody @Valid Account account) throws Exception {
         return accountService.save(account);
+    }
+
+    @PreAuthorize("hasAuthority('update:accounts')")
+    @RequestMapping(method = RequestMethod.PUT, value = "{id}")
+    public ResponseEntity updateAccount(@PathVariable(name = "id") Long id, @RequestBody Account account) throws Exception {
+        return accountService.update(id, account);
     }
 
     @PreAuthorize("hasAuthority('addRole:accounts')")
@@ -70,6 +77,12 @@ public class AccountController {
     @RequestMapping(method = RequestMethod.POST, value = "/permission/add" )
     public ResponseEntity addPermissionToAccount(@RequestBody PermissionToAccount form) throws Exception {
         return accountService.addPermissionToAccount(form.getUsername(), form.getPermName());
+    }
+
+    @PreAuthorize("hasAuthority('removePermission:accounts')")
+    @RequestMapping(method = RequestMethod.POST, value = "/permission/remove" )
+    public ResponseEntity removePermissionToAccount(@RequestBody PermissionToAccount form) throws Exception {
+        return accountService.removePermissionFromAccount(form.getUsername(), form.getPermName());
     }
 
     @RequestMapping(value = "/token/refresh", method = RequestMethod.GET)

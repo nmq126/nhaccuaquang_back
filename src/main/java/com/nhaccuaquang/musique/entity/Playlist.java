@@ -1,6 +1,5 @@
 package com.nhaccuaquang.musique.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,8 +19,9 @@ import java.util.Set;
 public class Playlist {
 
     @Id
+    @Column(name = "playlist_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long playlistId;
 
     @Column(name = "name")
     @NotBlank(message = "Playlist name is required")

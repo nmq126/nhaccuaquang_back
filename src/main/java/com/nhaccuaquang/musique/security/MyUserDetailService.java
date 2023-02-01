@@ -32,7 +32,8 @@ public class MyUserDetailService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(permission.getName()));
         });
         org.springframework.security.core.userdetails.User userSpring
-                = new org.springframework.security.core.userdetails.User(foundAccount.getUsername(), foundAccount.getPassword(), authorities);
+                = new org.springframework.security.core.userdetails.User
+                (foundAccount.getUsername(), foundAccount.getPassword(), authorities);
         return userSpring;
     }
 }

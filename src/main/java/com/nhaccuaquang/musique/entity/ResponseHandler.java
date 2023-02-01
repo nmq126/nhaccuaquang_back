@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +16,7 @@ public class ResponseHandler {
     private int status;
     private String message;
     private HashMap<String, Object> data;
+    private List<String> errors;
 
     public static final class ResponseHandlerBuilder {
         private int status;

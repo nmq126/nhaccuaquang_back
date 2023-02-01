@@ -5,20 +5,20 @@ import com.nhaccuaquang.musique.service.SongService;
 import com.nhaccuaquang.musique.specification.SearchBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RestController
-@RequestMapping(value = "/api/v1/songs")
+@RequestMapping(value = "${api.song.path}")
 @CrossOrigin("http://localhost:8081/")
 public class SongController {
     @Autowired
     SongService songService;
 
-    @PreAuthorize("hasAuthority('view:songs')")
+//    @PreAuthorize("hasAuthority('view:songs')")
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity getAllSongs(
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -43,13 +43,14 @@ public class SongController {
         return songService.findAll(searchBody);
     }
 
-    @PreAuthorize("hasAuthority('view:songs')")
+//    @PreAuthorize("hasAuthority('view:songs')")
     @RequestMapping(value = "{id}", method = RequestMethod.GET)
-    public ResponseEntity getSongById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity getSongById(@PathVariable(name = "id") Long id, Principal principal) {
+        System.out.println(principal.toString());
         return songService.findById(id);
     }
 
-    @PreAuthorize("hasAuthority('create:songs')")
+//    @PreAuthorize("hasAuthority('create:songs')")
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity createSong(@RequestBody @Valid Song song) throws Exception {
         return songService.save(song);

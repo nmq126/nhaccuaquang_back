@@ -22,8 +22,8 @@ public class PlaylistController {
 
     @PreAuthorize("hasAuthority('view:playlists')")
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity getAllPlaylists() throws Exception {
-        return playlistService.findAll();
+    public ResponseEntity getAllPlaylists(@RequestParam(value = "keyword", required = false) String keyword) throws Exception {
+        return playlistService.findAll(keyword);
     }
 
     @PreAuthorize("hasAuthority('create:playlists')")

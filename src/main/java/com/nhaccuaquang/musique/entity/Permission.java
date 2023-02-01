@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 
 @Entity
@@ -18,9 +19,12 @@ import java.util.Collection;
 public class Permission {
 
     @Id
+    @Column(name = "permission_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long permissionId;
 
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Permission name is required")
     private String name;
 
     @JsonIgnore

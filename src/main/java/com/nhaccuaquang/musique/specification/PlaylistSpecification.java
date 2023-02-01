@@ -1,6 +1,7 @@
 package com.nhaccuaquang.musique.specification;
 
 import com.nhaccuaquang.musique.entity.Playlist;
+import com.nhaccuaquang.musique.entity.PlaylistDetail;
 import com.nhaccuaquang.musique.entity.Song;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -41,12 +42,10 @@ public class PlaylistSpecification implements Specification<Playlist> {
                 return builder.equal(root.get(criteria.getKey()), criteria.getValue());
             }
         } else if (criteria.getOperation().equalsIgnoreCase("join")) {
-            Join<Playlist, Song> playlistSongJoin = root.join("song");
-            Predicate predicate = builder.or(
-                    builder.like(root.get("id"), "%" + criteria.getValue() + "%"),
-                    builder.like(playlistSongJoin.get("email"), "%" + criteria.getValue() + "%")
-            );
-            return predicate;
+            query.distinct(true);
+            Join<Playlist, PlaylistDetail> playlistPlaylistDetailJoin = root.join("playlistDetails");
+            Join<PlaylistDetail, Song> playlistDetailSongJoin = playlistPlaylistDetailJoin.join("song");
+            return builder.like(playlistDetailSongJoin.get(criteria.getKey()), "%" + criteria.getValue() + "%");
         }
         return null;
     }

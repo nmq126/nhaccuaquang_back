@@ -24,7 +24,7 @@ public class GenreController {
         return genreService.findAll();
     }
 
-    @PreAuthorize("hasAuthority('create:genres')")
+//    @PreAuthorize("hasAuthority('create:genres')")
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity createGenre(@RequestBody @Valid Genre genre) throws Exception {
         return genreService.save(genre);

@@ -20,10 +20,11 @@ import java.util.Set;
 public class Genre {
 
     @Id
+    @Column(name = "genre_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long genreId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     @NotBlank(message = "Genre name is required")
     private String name;
 

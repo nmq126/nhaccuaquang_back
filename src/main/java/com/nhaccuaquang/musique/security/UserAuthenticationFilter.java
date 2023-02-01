@@ -76,4 +76,5 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), tokens);
     }
+
 }
